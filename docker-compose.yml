@@ -11,30 +11,44 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   backend:
     build: ./backend
     command: python manage.py runserver 0.0.0.0:8000
+    working_dir: /app
     volumes:
       - ./backend:/app
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      - DB_HOST=db
-      - DB_NAME=articulosdb
-      - DB_USER=user
-      - DB_PASSWORD=password
+      DB_HOST: db
+      DB_NAME: articulosdb
+      DB_USER: user
+      DB_PASSWORD: password
 
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/usr/src/app
+      - "3000:80"
     depends_on:
       - backend
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src
+          target: /usr/src/app/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./frontend/package.json
 
 volumes:
   db_data:

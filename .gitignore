@@ -1,0 +1,38 @@
+# Node
+frontend/node_modules/
+frontend/build/
+
+# Python
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+
+# VSCode
+.vscode/
+
+# Docker
+*.log
+*.pid
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Excel import/export temp
+*.xlsx
+*.xls
+
+# Env
+.env
+.env.*
+
+# Misc
+*.sqlite3
+*.db
+
+# Coverage
+coverage/
+*.coverage
+
+# Others
+backend/.migrations/
