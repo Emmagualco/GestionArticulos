@@ -45,7 +45,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'America/Mexico_City'
+TIME_ZONE = "America/Argentina/Buenos_Aires"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -62,7 +62,7 @@ DATABASES = {
         'NAME': 'articulosdb',
         'USER': 'user',
         'PASSWORD': 'password',
-        'HOST': 'db',  # nombre del servicio en docker-compose
+    'HOST': 'db',
         'PORT': '3306',
     }
 }

@@ -12,7 +12,7 @@ class ArticuloViewSet(viewsets.ModelViewSet):
 	serializer_class = ArticuloSerializer
 
 
-# Endpoint de login
+## Login
 @api_view(['POST'])
 def login_view(request):
 	username = request.data.get('username')
@@ -34,7 +34,7 @@ class ArticuloRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 	queryset = Articulo.objects.all()
 	serializer_class = ArticuloSerializer
 
-# Bulk delete endpoint
+## Eliminación masiva
 class ArticuloBulkDeleteView(APIView):
 	def post(self, request):
 		codigos = request.data.get('codigos', [])
@@ -51,7 +51,7 @@ class ArticuloBulkDeleteView(APIView):
 			return Response({'error': 'Algunos artículos no se pudieron eliminar', 'codigos': failed}, status=status.HTTP_400_BAD_REQUEST)
 		return Response({'success': True})
 
-# Bulk update endpoint
+## Edición masiva
 class ArticuloBulkUpdateView(APIView):
 	def post(self, request):
 		updates = request.data.get('updates', [])

@@ -36,7 +36,7 @@ const ImportExcel = () => {
         .map((h, i) => (h ? h.toString().toLowerCase().trim() : `column${i + 1}`));
 
 
-      // Validar formato general del archivo
+  // Validar formato
       if (headers.length < 3) {
         setFeedback('Error: El formato del archivo es incorrecto. Debe tener al menos las columnas: codigo, descripcion, precio. Formatos válidos: .xlsx, .xls');
         setLoading(false);
@@ -57,7 +57,7 @@ const ImportExcel = () => {
         headers.forEach((header, i) => {
           item[header] = rowData[i];
         });
-        // Normalizar y validar campos
+  // Validar campos
         const codigo = item.codigo ? String(item.codigo).trim() : '';
         const descripcion = item.descripcion ? String(item.descripcion).trim() : '';
         let precio = item.precio;
@@ -67,7 +67,7 @@ const ImportExcel = () => {
         data.push({ codigo, descripcion, precio });
       });
 
-      // Enviar cada artículo al backend
+  // Enviar datos
       let successCount = 0;
       let errorCount = 0;
       let errorMessages = [];

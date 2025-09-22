@@ -12,7 +12,7 @@ const ExportExcel = ({ data }) => {
 
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Artículos");
-      // Encabezados compatibles con importación
+  // Encabezados
       const headerMap = {
         codigo: "codigo",
         descripcion: "descripcion",
@@ -21,7 +21,7 @@ const ExportExcel = ({ data }) => {
       const headers = Object.keys(headerMap);
       worksheet.addRow(headers);
 
-      // Agregar datos
+  // Datos
       data.forEach((item) => {
         const row = headers.map((header) => item[header]);
         worksheet.addRow(row);

@@ -10,7 +10,7 @@ class ArticuloSerializer(serializers.ModelSerializer):
 	def validate_codigo(self, value):
 		if not value:
 			raise serializers.ValidationError('El campo código es obligatorio.')
-		# Only check for duplicates if creating or changing codigo
+	# Validar duplicados
 		if self.instance:
 			if value != self.instance.codigo and Articulo.objects.filter(codigo=value).exists():
 				raise serializers.ValidationError('El código ya existe.')

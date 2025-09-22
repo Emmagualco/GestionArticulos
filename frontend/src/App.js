@@ -9,17 +9,17 @@ import BulkEditModal from "./components/BulkEditModal";
 import "./App.css";
 
 function App() {
-	// Estado de autenticación
+	// Estado de login
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [loginError, setLoginError] = useState('');
-	const [userRole, setUserRole] = useState(''); // 'admin' o 'user'
-	// ...eliminado efecto de redirección hash...
+	const [userRole, setUserRole] = useState('');
+	//
 
 	function handleLogout() {
 		setIsAuthenticated(false);
 		setUserRole("");
 		localStorage.removeItem("authSession");
-		// El estado del formulario de login se gestiona en LoginPanel
+	//
 	}
 
 	async function handleLogin({ username, password }) {
@@ -48,7 +48,7 @@ function App() {
 	const [sortBy, setSortBy] = useState("codigo");
 	const [sortDir, setSortDir] = useState("asc");
 
-// Toast feedback state
+// Mensajes de feedback
 const [toast, setToast] = useState({ show: false, message: '', type: '' });
 function showToast(message, type = 'success') {
 	setToast({ show: true, message, type });
@@ -56,7 +56,7 @@ function showToast(message, type = 'success') {
 }
 
 	useEffect(() => {
-		// Restaurar sesión solo al montar
+	// Restaurar sesión
 		const session = localStorage.getItem("authSession");
 		if (session) {
 			try {
