@@ -9,11 +9,90 @@ import BulkEditModal from "./components/BulkEditModal";
 import "./App.css";
 
 function App() {
-	// Estado de login
+	// Estado de login (debe ir antes de cualquier uso)
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
-	const [loginError, setLoginError] = useState('');
-	const [userRole, setUserRole] = useState('');
-	//
+	const [loginError, setLoginError] = useState("");
+	const [userRole, setUserRole] = useState("");
+	const [username, setUsername] = useState("");
+
+	// Modal de gestión de usuario
+	const [userModalOpen, setUserModalOpen] = useState(false);
+	const [userModalLoading, setUserModalLoading] = useState(false);
+	const [userModalError, setUserModalError] = useState("");
+	const [userModalSuccess, setUserModalSuccess] = useState("");
+	const [userModalData, setUserModalData] = useState({ username: "", password: "" });
+	const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			const session = localStorage.getItem("authSession");
+			if (session) {
+				const { username } = JSON.parse(session);
+				setUserModalData(prev => ({ ...prev, username }));
+				setUsername(username);
+			}
+		}
+	}, [isAuthenticated, userModalOpen]);
+
+	function handleUserModalSave(e) {
+		e.preventDefault();
+		setUserModalLoading(true);
+		setUserModalError("");
+		setUserModalSuccess("");
+		axios.patch("/api/articulos/usuario/", userModalData)
+			.then(() => {
+				setUserModalSuccess("Datos actualizados correctamente");
+			})
+			.catch(() => {
+				setUserModalError("Error al actualizar los datos");
+			})
+			.finally(() => setUserModalLoading(false));
+	}
+
+	const renderUserModal = () => (
+		userModalOpen && (
+			<div className="modal-overlay" style={{
+				position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 1000,
+				display: 'flex', alignItems: 'center', justifyContent: 'center'
+			}}>
+				<div className="modal-content" style={{
+					minWidth: 340, maxWidth: 400, background: 'white', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', padding: 32,
+					display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, position: 'relative'
+				}}>
+					<h2 style={{ fontWeight: 700, fontSize: 24, marginBottom: 18, color: '#1a2947', letterSpacing: 0.5 }}>Gestionar usuario</h2>
+					<form onSubmit={handleUserModalSave} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 18 }}>
+						<label style={{ fontWeight: 500, color: '#1a2947', fontSize: 15 }}>
+							Usuario
+							<input type="text" value={userModalData.username} disabled
+								style={{
+									marginLeft: 8, marginTop: 6, padding: '8px 12px', borderRadius: 8, border: '1px solid #dbe2ef', background: '#f3f6fa', color: '#7a7a7a', fontWeight: 500, fontSize: 15, width: '100%'
+								}} />
+						</label>
+						<label style={{ fontWeight: 500, color: '#1a2947', fontSize: 15 }}>
+							Nueva contraseña
+							<input type="password" value={userModalData.password} onChange={e => setUserModalData({ ...userModalData, password: e.target.value })}
+								style={{
+									marginLeft: 8, marginTop: 6, padding: '8px 12px', borderRadius: 8, border: '1px solid #dbe2ef', background: '#fff', color: '#1a2947', fontWeight: 500, fontSize: 15, width: '100%'
+								}} />
+						</label>
+						<div style={{ display: 'flex', gap: 16, justifyContent: 'flex-end', marginTop: 8 }}>
+							<button type="button" className="clear-btn" onClick={() => setUserModalOpen(false)}
+								style={{
+									background: '#f3f6fa', color: '#1a2947', border: 'none', borderRadius: 8, padding: '8px 22px', fontWeight: 600, fontSize: 15, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'background 0.2s'
+								}}>Cancelar</button>
+							<button type="submit" className="form-panel-button" disabled={userModalLoading}
+								style={{
+									background: userModalLoading ? '#bfcbe6' : 'linear-gradient(90deg,#1a2947 60%,#3f72af 100%)', color: 'white', border: 'none', borderRadius: 8, padding: '8px 22px', fontWeight: 700, fontSize: 16, boxShadow: '0 2px 12px rgba(63,114,175,0.12)', cursor: userModalLoading ? 'not-allowed' : 'pointer', transition: 'background 0.2s'
+								}}>Guardar</button>
+						</div>
+						{userModalLoading && <div className="modal-loading" style={{ color: '#3f72af', fontWeight: 500, marginTop: 8 }}>Guardando cambios...</div>}
+						{userModalError && <div className="modal-error" style={{ color: '#c0392b', fontWeight: 600, marginTop: 8 }}>{userModalError}</div>}
+						{userModalSuccess && <div className="modal-success" style={{ color: '#27ae60', fontWeight: 600, marginTop: 8 }}>{userModalSuccess}</div>}
+					</form>
+				</div>
+			</div>
+		)
+	);
 
 	function handleLogout() {
 		setIsAuthenticated(false);
@@ -29,6 +108,7 @@ function App() {
 			if (res.data.success) {
 				setIsAuthenticated(true);
 				setUserRole(res.data.role);
+				setUsername(username);
 				localStorage.setItem("authSession", JSON.stringify({
 					username,
 					role: res.data.role,
@@ -43,6 +123,11 @@ function App() {
 	}
 
 	const [articulos, setArticulos] = useState([]);
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(20);
+	const [total, setTotal] = useState(0);
+	const [nextPage, setNextPage] = useState(null);
+	const [prevPage, setPrevPage] = useState(null);
 	const [filter, setFilter] = useState("");
 	const [filterColumn, setFilterColumn] = useState("codigo");
 	const [sortBy, setSortBy] = useState("codigo");
@@ -56,14 +141,15 @@ function showToast(message, type = 'success') {
 }
 
 	useEffect(() => {
-	// Restaurar sesión
+		// Restaurar sesión
 		const session = localStorage.getItem("authSession");
 		if (session) {
 			try {
-				const { role, timestamp } = JSON.parse(session);
+				const { role, username, timestamp } = JSON.parse(session);
 				if (Date.now() - timestamp < 10 * 60 * 1000) {
 					setIsAuthenticated(true);
 					setUserRole(role);
+					setUsername(username);
 				} else {
 					localStorage.removeItem("authSession");
 				}
@@ -74,13 +160,25 @@ function showToast(message, type = 'success') {
 	useEffect(() => {
 		if (isAuthenticated) {
 			axios
-				.get("/api/articulos/")
-				.then((res) => setArticulos(res.data))
+				.get(`/api/articulos/?page=${page}&page_size=${pageSize}`)
+				.then((res) => {
+					setArticulos(res.data.results);
+					setTotal(res.data.count);
+					setNextPage(res.data.next);
+					setPrevPage(res.data.previous);
+				})
 				.catch((err) => console.error(err));
 		} else {
 			setArticulos([]);
 		}
-	}, [isAuthenticated]);
+	}, [isAuthenticated, page, pageSize]);
+	// Controles de paginación
+	const handleNextPage = () => {
+		if (nextPage) setPage(page + 1);
+	};
+	const handlePrevPage = () => {
+		if (prevPage && page > 1) setPage(page - 1);
+	};
 
 // Filter articles by code or description
 let filteredArticulos = articulos.filter(a => {
@@ -129,7 +227,14 @@ const handleSingleEditSave = (updates) => {
 	const upd = updates[0];
 	setSingleEditLoading(true);
 	setSingleEditError("");
-	axios.patch(`/api/articulos/${singleEditArticulo.id}/`, upd)
+	const session = localStorage.getItem("authSession");
+	let username = "";
+	if (session) {
+		try {
+			username = JSON.parse(session).username;
+		} catch {}
+	}
+	axios.patch(`/api/articulos/${singleEditArticulo.id}/`, { ...upd, usuario: username })
 		.then(() => {
 			setArticulos(prev => prev.map(a => a.codigo === upd.codigo ? { ...a, ...upd } : a));
 			setSingleEditOpen(false);
@@ -143,11 +248,22 @@ const handleSingleEditSave = (updates) => {
 };
 
 // Delete handler with confirmation
+const fetchArticulos = () => {
+	axios.get(`/api/articulos/?page=${page}&page_size=${pageSize}`)
+		.then((res) => {
+			setArticulos(res.data.results);
+			setTotal(res.data.count);
+			setNextPage(res.data.next);
+			setPrevPage(res.data.previous);
+		})
+		.catch((err) => console.error(err));
+};
+
 const handleDelete = (articulo) => {
 	if (window.confirm(`¿Seguro que deseas eliminar el artículo ${articulo.codigo}?`)) {
 		axios.delete(`/api/articulos/${articulo.id}/`)
 			.then(() => {
-				setArticulos(prev => prev.filter(a => a.id !== articulo.id));
+				fetchArticulos();
 				showToast('Artículo eliminado correctamente', 'success');
 			})
 			.catch(err => {
@@ -177,7 +293,7 @@ const handleBulkDelete = () => {
 	if (window.confirm(`¿Seguro que deseas eliminar ${selected.length} artículos seleccionados?`)) {
 		axios.post('/api/articulos/bulk-delete/', { codigos: selected })
 			.then(() => {
-				setArticulos(prev => prev.filter(a => !selected.includes(a.codigo)));
+				fetchArticulos();
 				setSelected([]);
 				showToast('Artículos eliminados correctamente', 'success');
 			})
@@ -208,7 +324,14 @@ const handleBulkEditSave = (updates) => {
 	});
 	setEditLoading(true);
 	setEditError("");
-	axios.post('/api/articulos/bulk-update/', { updates: updatesWithId })
+	const session = localStorage.getItem("authSession");
+	let username = "";
+	if (session) {
+		try {
+			username = JSON.parse(session).username;
+		} catch {}
+	}
+	axios.post('/api/articulos/bulk-update/', { updates: updatesWithId, usuario: username })
 		.then(() => {
 			// Update local state
 			setArticulos(prev => prev.map(a => {
@@ -248,11 +371,46 @@ const bulkActionsProps = {
 	return (
 		<div className="app-container">
 			<header className="app-header">
-				<div className="header-content">
-					<span className="header-icon" role="img" aria-label="box">
-						📦
-					</span>
-					<h1>Gestión de Artículos</h1>
+				<div className="header-content" style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0 32px'}}>
+					{/* Logo y título a la izquierda */}
+					<div style={{display:'flex', alignItems:'center', gap:'16px'}}>
+						<span className="header-icon" role="img" aria-label="box" style={{fontSize:'2.2em'}}>
+							📦
+						</span>
+						<h1 style={{fontWeight:900, fontSize:'2.1em', color:'#fff', textShadow:'0 2px 12px #24416b55', marginLeft:8}}>Gestión de Artículos</h1>
+					</div>
+					{/* Usuario y menú a la derecha */}
+					{isAuthenticated && (
+						<div style={{position:'relative', display:'flex', alignItems:'center', gap:'12px'}}>
+							<button
+								className="user-menu-username"
+								onClick={() => setUserMenuOpen(v => !v)}
+								aria-haspopup="true"
+								aria-expanded={userMenuOpen ? "true" : "false"}
+								style={{
+									color: username ? '#fff' : '#888',
+									fontWeight:700,
+									fontSize:'1.1em',
+									background: username ? 'none' : '#f3f6fa',
+									border: username ? 'none' : '1.5px solid #dbe2ef',
+									cursor:'pointer',
+									padding:'0 8px',
+									textShadow: username ? '0 2px 12px #24416b55' : 'none',
+									borderRadius: '8px',
+									minWidth: '120px'
+								}}
+							>
+								Usuario: <span style={{color: username ? '#fff' : '#888'}}>{username || '—'}</span> ▼
+							</button>
+							{userMenuOpen && (
+								<div className="user-menu-dropdown" style={{position:'absolute', left:0, top:'100%', minWidth:'180px', boxShadow:'0 8px 32px rgba(0,0,0,0.18)', background:'#f3f6fa', border:'1.5px solid #dbe2ef', marginTop:'6px', zIndex:9999}}>
+									<button onClick={() => { setUserModalOpen(true); setUserMenuOpen(false); }}>Gestionar usuario</button>
+									<button onClick={() => { alert('Función de ver perfil (simulada)'); setUserMenuOpen(false); }}>Ver perfil</button>
+									<button className="logout-btn" onClick={() => { handleLogout(); setUserMenuOpen(false); }}>Cerrar sesión</button>
+								</div>
+							)}
+						</div>
+					)}
 				</div>
 			</header>
 			<main>
@@ -260,9 +418,8 @@ const bulkActionsProps = {
 					<LoginPanel onLogin={handleLogin} loginError={loginError} />
 				) : (
 					<div>
-						<div style={{display:'flex', justifyContent:'flex-end', margin:'18px 0'}}>
-							<button className="logout-btn" onClick={handleLogout}>Cerrar sesión</button>
-						</div>
+						{/* Eliminado: barra de usuario y botones duplicados. Ahora solo menú en el header. */}
+						{renderUserModal()}
 						<div className="front-grid">
 							<div className="form-panel">
 								<ArticleForm onArticuloCreado={articulo => {
@@ -309,6 +466,27 @@ const bulkActionsProps = {
 											}
 										}}
 									/>
+									<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, margin: '18px 0' }}>
+										<button
+											className="form-panel-button"
+											onClick={() => setPage(page - 1)}
+											disabled={page === 1 || !prevPage}
+											style={page === 1 || !prevPage ? { background: "#eee", color: "#888", cursor: "not-allowed" } : {}}
+										>
+											Anterior
+										</button>
+										<span style={{ fontSize: "0.9em", margin: "0 8px" }}>
+											Página {page} de {Math.max(1, Math.ceil(total / pageSize))} &nbsp;|&nbsp; Mostrando {articulos.length > 0 ? ((page - 1) * pageSize + 1) : 0} - {((page - 1) * pageSize) + articulos.length} de {total} artículos
+										</span>
+										<button
+											className="form-panel-button"
+											onClick={() => setPage(page + 1)}
+											disabled={page >= Math.ceil(total / pageSize) || !nextPage}
+											style={page >= Math.ceil(total / pageSize) || !nextPage ? { background: "#eee", color: "#888", cursor: "not-allowed" } : {}}
+										>
+											Siguiente
+										</button>
+									</div>
 									<BulkEditModal
 										open={editModalOpen}
 										articulos={articulosWithHandlers.filter(a => selected.includes(a.codigo))}

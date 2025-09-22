@@ -5,7 +5,8 @@ from .views import (
     ArticuloRetrieveUpdateDestroyView,
     ArticuloBulkDeleteView,
     ArticuloBulkUpdateView,
-    login_view
+    login_view,
+    usuario_update_view
 )
 
 urlpatterns = [
@@ -14,4 +15,5 @@ urlpatterns = [
     path('bulk-delete/', ArticuloBulkDeleteView.as_view(), name='articulo-bulk-delete'),
     path('bulk-update/', ArticuloBulkUpdateView.as_view(), name='articulo-bulk-update'),
     path('login/', login_view, name='login'),
+    path('usuario/', usuario_update_view, name='usuario-update'),
 ]

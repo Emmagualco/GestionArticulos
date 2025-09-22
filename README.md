@@ -31,6 +31,7 @@ cd GestionArticulos
 - **Windows:** Descarga e instala [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 - **Linux:** Instala Docker y Docker Compose desde tu gestor de paquetes o desde [docker.com](https://docs.docker.com/get-docker/).
 
+
 ### 3. Construye y ejecuta la aplicación
 
 - **Windows (PowerShell):**
@@ -38,6 +39,8 @@ cd GestionArticulos
   docker-compose build --no-cache
   docker-compose up --build
   ```
+
+> Nota: Si ves una advertencia sobre la clave `version` en docker-compose.yml, puedes ignorarla o eliminar la línea `version:` del archivo para evitar confusión. No afecta el funcionamiento.
 
 - **Linux (bash):**
   ```bash
@@ -103,11 +106,6 @@ El archivo debe tener una hoja principal con las siguientes columnas (en la prim
 - Se priorizó la accesibilidad y el feedback visual en la interfaz para mejorar la usabilidad.
 - Las fechas de creación y modificación se agregaron para trazabilidad, aunque no son requeridas explícitamente.
 - Se documentaron todos los endpoints y se recomienda agregar pruebas automáticas para robustez.
-
-## Contacto y acceso al repositorio
-- Repositorio privado y compartido con:
-  - mickaelacrespo@aitsolutions.com.ar
-  - federicoalloron@aitsolutions.com.ar
 
 ## Ejemplo de uso
 1. Inicia sesión como admin o user.

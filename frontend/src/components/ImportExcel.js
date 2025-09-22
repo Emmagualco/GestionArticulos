@@ -71,9 +71,17 @@ const ImportExcel = () => {
       let successCount = 0;
       let errorCount = 0;
       let errorMessages = [];
+      // Obtener usuario logueado
+      let username = "";
+      try {
+        const session = localStorage.getItem("authSession");
+        if (session) {
+          username = JSON.parse(session).username;
+        }
+      } catch {}
       for (const articulo of data) {
         try {
-          await axios.post("/api/articulos/", articulo);
+          await axios.post("/api/articulos/", { ...articulo, usuario: username });
           successCount++;
         } catch (err) {
           errorCount++;

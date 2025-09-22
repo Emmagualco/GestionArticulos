@@ -15,6 +15,8 @@ class Articulo(models.Model):
 	precio = models.DecimalField(max_digits=10, decimal_places=2)
 	fecha_creacion = models.DateTimeField(auto_now_add=True)
 	fecha_modificacion = models.DateTimeField(auto_now=True)
+	usuario_creador = models.ForeignKey(Usuario, related_name='articulos_creados', null=True, blank=True, on_delete=models.SET_NULL)
+	usuario_modificador = models.ForeignKey(Usuario, related_name='articulos_modificados', null=True, blank=True, on_delete=models.SET_NULL)
 
 	def __str__(self):
 		return f"{self.codigo} - {self.descripcion}"

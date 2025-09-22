@@ -1,32 +1,44 @@
+
 import React from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import axios from "axios";
 
-const ExportExcel = ({ data }) => {
+const ExportExcel = () => {
   const handleExport = async () => {
     try {
-      if (!data || data.length === 0) {
+      // Obtener todos los artículos sin paginación
+      let allArticulos = [];
+      let page = 1;
+      let pageSize = 100;
+      let hasMore = true;
+      while (hasMore) {
+        const res = await axios.get(`/api/articulos/?page=${page}&page_size=${pageSize}`);
+        allArticulos = allArticulos.concat(res.data.results);
+        hasMore = !!res.data.next;
+        page++;
+      }
+      if (!allArticulos || allArticulos.length === 0) {
         alert("No hay datos para exportar");
         return;
       }
-
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Artículos");
-  // Encabezados
       const headerMap = {
-        codigo: "codigo",
-        descripcion: "descripcion",
-        precio: "precio"
+        codigo: "Código",
+        descripcion: "Descripción",
+        precio: "Precio",
+        fecha_creacion: "Fecha creación",
+        fecha_modificacion: "Fecha modificación",
+        usuario_creador: "Usuario creador",
+        usuario_modificador: "Usuario modificador"
       };
-      const headers = Object.keys(headerMap);
+      const headers = Object.values(headerMap);
       worksheet.addRow(headers);
-
-  // Datos
-      data.forEach((item) => {
-        const row = headers.map((header) => item[header]);
+      allArticulos.forEach((item) => {
+        const row = Object.keys(headerMap).map((key) => item[key] || "");
         worksheet.addRow(row);
       });
-
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/octet-stream" });
       saveAs(blob, "articulos.xlsx");
@@ -34,8 +46,7 @@ const ExportExcel = ({ data }) => {
       console.error("Error al exportar el Excel:", error);
     }
   };
-
-  return <button className="edit-btn" onClick={handleExport}>Exportar a Excel</button>;
+  return <button className="form-panel-button" onClick={handleExport}>Exportar a Excel</button>;
 };
 
 export default ExportExcel;

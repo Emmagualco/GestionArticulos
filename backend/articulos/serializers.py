@@ -3,9 +3,12 @@ from rest_framework import serializers
 from .models import Articulo
 
 class ArticuloSerializer(serializers.ModelSerializer):
+	usuario_creador = serializers.CharField(source='usuario_creador.username', read_only=True)
+	usuario_modificador = serializers.CharField(source='usuario_modificador.username', read_only=True)
+
 	class Meta:
 		model = Articulo
-		fields = ['id', 'codigo', 'descripcion', 'precio', 'fecha_creacion', 'fecha_modificacion']
+		fields = ['id', 'codigo', 'descripcion', 'precio', 'fecha_creacion', 'fecha_modificacion', 'usuario_creador', 'usuario_modificador']
 
 	def validate_codigo(self, value):
 		if not value:

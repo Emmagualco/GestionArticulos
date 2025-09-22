@@ -38,6 +38,7 @@ import React from 'react';
 								style={{ cursor: "pointer" }}>
 								Fecha modificación {sortBy === "fecha_modificacion" && (sortDir === "asc" ? "▲" : "▼")}
 							</th>
+                            
 							<th>Acciones</th>
 						</tr>
 					</thead>
@@ -59,6 +60,7 @@ import React from 'react';
 								<td>{a.precio}</td>
 								<td>{a.fecha_creacion ? new Date(a.fecha_creacion).toLocaleString() : ''}</td>
 								<td>{a.fecha_modificacion ? new Date(a.fecha_modificacion).toLocaleString() : ''}</td>
+                                
 								<td>
 									<button className="edit-btn" onClick={() => a.onEdit && a.onEdit(a)} title="Editar artículo">✏️</button>
 									{showBulkActions && a.onDelete && (

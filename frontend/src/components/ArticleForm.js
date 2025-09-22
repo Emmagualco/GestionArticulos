@@ -15,10 +15,18 @@ function ArticleForm({ onArticuloCreado }) {
 		e.preventDefault();
 		let precio = form.precio.replace(',', '.');
 		precio = parseFloat(precio);
+		const session = localStorage.getItem("authSession");
+		let username = "";
+		if (session) {
+			try {
+				username = JSON.parse(session).username;
+			} catch {}
+		}
 		const payload = {
 			codigo: form.codigo.trim(),
 			descripcion: form.descripcion.trim(),
-			precio: precio
+			precio: precio,
+			usuario: username
 		};
 		try {
 			const res = await axios.post('/api/articulos/', payload);
