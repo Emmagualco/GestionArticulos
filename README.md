@@ -1,4 +1,4 @@
-# Gestión de Artículos - Desafío Fullstack
+# Gestión de Artículos - Desafío Soporte L2 L3
 
 Aplicación fullstack para la gestión de artículos con importación/exportación Excel, login, roles de usuario y acciones masivas. Dockerizada y lista para producción.
 
