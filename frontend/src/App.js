@@ -9,7 +9,7 @@ import BulkEditModal from "./components/BulkEditModal";
 import "./App.css";
 
 function App() {
-	// Estado de login (debe ir antes de cualquier uso)
+	
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [loginError, setLoginError] = useState("");
 	const [userRole, setUserRole] = useState("");
@@ -180,7 +180,7 @@ function showToast(message, type = 'success') {
 		if (prevPage && page > 1) setPage(page - 1);
 	};
 
-// Filter articles by code or description
+
 let filteredArticulos = articulos.filter(a => {
 	if (!filter) return true;
 	let value = a[filterColumn];
@@ -210,19 +210,19 @@ filteredArticulos = [...filteredArticulos].sort((a, b) => {
 	return 0;
 });
 
-// Individual edit modal state
+
 const [singleEditOpen, setSingleEditOpen] = useState(false);
 const [singleEditArticulo, setSingleEditArticulo] = useState(null);
 const [singleEditLoading, setSingleEditLoading] = useState(false);
 const [singleEditError, setSingleEditError] = useState("");
 
-// Edit handler (open modal)
+
 const handleEdit = (articulo) => {
 	setSingleEditArticulo(articulo);
 	setSingleEditOpen(true);
 };
 
-// Individual edit save handler
+
 const handleSingleEditSave = (updates) => {
 	const upd = updates[0];
 	setSingleEditLoading(true);
@@ -247,7 +247,7 @@ const handleSingleEditSave = (updates) => {
 		.finally(() => setSingleEditLoading(false));
 };
 
-// Delete handler with confirmation
+
 const fetchArticulos = () => {
 	axios.get(`/api/articulos/?page=${page}&page_size=${pageSize}`)
 		.then((res) => {
@@ -273,20 +273,20 @@ const handleDelete = (articulo) => {
 	}
 };
 
-// Selection state for bulk deletion
+
 const [selected, setSelected] = useState([]);
 
-// Select/deselect one
+
 const handleSelect = (codigo, checked) => {
 	setSelected(prev => checked ? [...prev, codigo] : prev.filter(c => c !== codigo));
 };
 
-// Select/deselect all
+
 const handleSelectAll = (checked) => {
 	setSelected(checked ? filteredArticulos.map(a => a.codigo) : []);
 };
 
-// Bulk delete handler (using backend bulk endpoint)
+
 const handleBulkDelete = () => {
 	if (userRole !== 'admin') return; // Solo admin puede eliminar masivamente
 	if (selected.length === 0) return;
@@ -304,20 +304,20 @@ const handleBulkDelete = () => {
 	}
 };
 
-// Bulk edit modal state
+
 const [editModalOpen, setEditModalOpen] = useState(false);
 const [editLoading, setEditLoading] = useState(false);
 const [editError, setEditError] = useState("");
 
-// Bulk edit handler (open modal)
+
 const handleBulkEdit = () => {
 	if (selected.length === 0) return;
 	setEditModalOpen(true);
 };
 
-// Bulk edit save handler
+
 const handleBulkEditSave = (updates) => {
-	// Add 'id' to each update for backend matching
+
 	const updatesWithId = updates.map(u => {
 		const art = articulos.find(a => a.codigo === u.codigo);
 		return art ? { ...u, id: art.id } : u;
@@ -333,7 +333,7 @@ const handleBulkEditSave = (updates) => {
 	}
 	axios.post('/api/articulos/bulk-update/', { updates: updatesWithId, usuario: username })
 		.then(() => {
-			// Update local state
+	
 			setArticulos(prev => prev.map(a => {
 				const upd = updatesWithId.find(u => u.codigo === a.codigo);
 				return upd ? { ...a, ...upd } : a;
@@ -349,11 +349,11 @@ const handleBulkEditSave = (updates) => {
 		.finally(() => setEditLoading(false));
 };
 
-// Pass handlers to ArticleList
+
 const articulosWithHandlers = filteredArticulos.map(a => ({
 	...a,
 	onEdit: handleEdit,
-	// Solo pasar onDelete si el usuario es admin
+
 	...(userRole === 'admin' ? { onDelete: handleDelete } : {})
 	// Si no es admin, no pasar onDelete
 }));
@@ -372,14 +372,14 @@ const bulkActionsProps = {
 		<div className="app-container">
 			<header className="app-header">
 				<div className="header-content" style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'0 32px'}}>
-					{/* Logo y título a la izquierda */}
+				
 					<div style={{display:'flex', alignItems:'center', gap:'16px'}}>
 						<span className="header-icon" role="img" aria-label="box" style={{fontSize:'2.2em'}}>
 							📦
 						</span>
 						<h1 style={{fontWeight:900, fontSize:'2.1em', color:'#fff', textShadow:'0 2px 12px #24416b55', marginLeft:8}}>Gestión de Artículos</h1>
 					</div>
-					{/* Usuario y menú a la derecha */}
+				
 					{isAuthenticated && (
 						<div style={{position:'relative', display:'flex', alignItems:'center', gap:'12px'}}>
 							<button
@@ -418,7 +418,7 @@ const bulkActionsProps = {
 					<LoginPanel onLogin={handleLogin} loginError={loginError} />
 				) : (
 					<div>
-						{/* Eliminado: barra de usuario y botones duplicados. Ahora solo menú en el header. */}
+						
 						{renderUserModal()}
 						<div className="front-grid">
 							<div className="form-panel">
@@ -520,7 +520,7 @@ const bulkActionsProps = {
 			</footer>
 		</div>
 	);
-	// ...existing code...
+
 }
 
 export default App;
