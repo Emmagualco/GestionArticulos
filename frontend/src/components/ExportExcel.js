@@ -7,7 +7,7 @@ import axios from "axios";
 const ExportExcel = () => {
   const handleExport = async () => {
     try {
-      // Obtener todos los artículos sin paginación
+    
       let allArticulos = [];
       let page = 1;
       let pageSize = 100;
