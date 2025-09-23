@@ -154,7 +154,7 @@ docker-compose up --build
 
 ---
 
-## 🧪 Pruebas automáticas
+## 🧪 Pruebas automáticas futuras
 - **Backend**: agregar en `backend/articulos/tests.py`.  
 - **Frontend**: Jest + React Testing Library.  
 
